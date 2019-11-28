@@ -11,7 +11,7 @@ CORS(app)
 
 app.config['UPLOAD_FOLDER'] = '/upload'
 
-@app.route('/emotion', method=['POST'])
+@app.route('/emotion', methods=['POST'])
 def emotion():
     file = request.files['video']
     if file.filename == '':
