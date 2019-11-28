@@ -9,7 +9,7 @@ ALLOWED_EXTENSIONS = {'webm'}
 app = Flask(__name__)
 CORS(app)
 
-app.config['UPLOAD_FOLDER'] = '/upload'
+app.config['UPLOAD_FOLDER'] = 'upload'
 
 @app.route('/emotion', methods=['POST'])
 def emotion():
