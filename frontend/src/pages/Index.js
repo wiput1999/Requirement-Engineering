@@ -7,8 +7,8 @@ import Login from './Login'
 const Index = () => {
   return <>
     <TopMenu />
-    <Route path="/page" exact={true} component={Home} />
-    <Route path="/page/login" component={Login} />
+    <Route path="/" exact={true} component={Home} />
+    <Route path="/login" component={Login} />
   </>
 
 }

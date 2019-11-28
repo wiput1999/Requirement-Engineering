@@ -9,7 +9,7 @@ import history from './utils/history'
 function App() {
   return (
     <Router history={history}>
-      <Route path="/page" component={Index} />
+      <Route path="/" component={Index} />
     </Router>
   );
 }
