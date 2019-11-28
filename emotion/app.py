@@ -21,7 +21,8 @@ def emotion():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
 
-    return jsonify(emotion.gen(filepath))
+    results = emotion.gen(filepath)
+    return jsonify(results)
 
 def allowed_file(filename):
     return '.' in filename and \
