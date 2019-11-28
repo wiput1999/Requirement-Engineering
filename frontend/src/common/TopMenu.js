@@ -1,8 +1,7 @@
 import React, { useRef } from 'react'
 import styled from 'styled-components'
 import { Button } from 'semantic-ui-react'
-import StreamDisplay from 'stream-display';
-
+import RecordRTC from 'recordrtc'
 
 const Container = styled.div`
   width: 100%;
@@ -10,60 +9,70 @@ const Container = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   top: 0;
+  z-index: 9999;
   background-color: #444;
 `
 
 const TopMenu = () => {
   const videoElem = useRef()
+  const screenElem = useRef()
 
-  const displayMediaOptions = {
-    video: {
-      cursor: 'never'
-    },
-    audio: false
-  }
+  let recordVideo = null
+  let screenRecording = null
 
-  const dumpOptionsInfo = () => {
-    const videoTrack = videoElem.current.srcObject.getVideoTracks()[0];
-    console.log(videoTrack)
+  const captureUserMedia = (callback) => {
+    var params = { audio: false, video: true };
 
-    console.info("Track settings:");
-    console.info(JSON.stringify(videoTrack.getSettings(), null, 2));
-    console.info("Track constraints:");
-    console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
-  }
+    navigator.getUserMedia(params, callback, (error) => {
+      alert(JSON.stringify(error));
+    });
+  };
 
-  // const startCapture = async () => {
-  //   try {
-  //     const mediaDevices = navigator.mediaDevices
-  //     videoElem.current.srcObject = await mediaDevices.getDisplayMedia(
-  //       displayMediaOptions
-  //     )
-  //     dumpOptionsInfo()
-  //   } catch (err) {
-  //     console.error('Error: ' + err)
-  //   }
-  // }
+  const captureDisplayMedia = async () => {
+    const displayMediaOptions = {
+      video: {
+        cursor: "never"
+      },
+      audio: false
+    };
+
+    const stream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions)
+
+    return stream
+  };
 
   const startCapture = async () => {
-    const processImageData = imageData => {
-      console.log(imageData)
-    };
-    const stream = new StreamDisplay(processImageData);
+    captureUserMedia((stream) => {
+      recordVideo = RecordRTC(stream, { type: 'video', mimeType: 'video/mp4' });
+      videoElem.current.srcObject = stream
+      recordVideo.startRecording();
+    });
 
-    await stream.startCapture();
-    setTimeout(() => {
-      stream.stopCapture();
-    }, 5000)
+    captureDisplayMedia().then((stream) => {
+      screenRecording = RecordRTC(stream, { type: 'video', mimeType: 'video/mp4' })
+      screenElem.current.srcObject = stream
+      screenRecording.startRecording()
+    })
+
   }
 
-  const stopCapture = evt => {
-    const srcObject = videoElem.current.srcObject
-    if (srcObject) {
-      const tracks = srcObject.getTracks()
+  const stopCapture = () => {
+    recordVideo.stopRecording(() => {
+      console.log(recordVideo.getBlob())
+    })
 
-      tracks.forEach(track => track.stop())
-      videoElem.current.srcObject = null
+    screenRecording.stopRecording(() => {
+      console.log(screenRecording.getBlob())
+    })
+
+    let webcamTracks = videoElem.current.srcObject.getTracks();
+    let screenTracks = screenElem.current.srcObject.getTracks();
+
+    if (webcamTracks && screenTracks) {
+      webcamTracks.forEach(track => track.stop());
+      videoElem.current.srcObject = null;
+      screenTracks.forEach(track => track.stop());
+      screenElem.current.srcObject = null;
     }
   }
 
@@ -72,12 +81,15 @@ const TopMenu = () => {
       <Container>
         <div>
           <Button primary onClick={() => startCapture()}>Start</Button>
-        </div>
-        <div>
           <Button color='youtube' onClick={() => stopCapture()}>Stop</Button>
         </div>
+        <div>
+          <video ref={videoElem} style={{ maxHeight: '50px' }} autoPlay></video>
+        </div>
+        <div>
+          <video ref={screenElem} style={{ maxHeight: '50px' }} autoPlay></video>
+        </div>
       </Container>
-      <video ref={videoElem} style={{ display: 'none' }} autoPlay></video>
     </>
   )
 }
