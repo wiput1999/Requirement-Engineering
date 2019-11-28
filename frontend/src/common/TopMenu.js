@@ -1,11 +1,15 @@
 import React, { useRef } from 'react'
 import styled from 'styled-components'
+import { Button } from 'semantic-ui-react'
+import StreamDisplay from 'stream-display';
+
 
 const Container = styled.div`
   width: 100%;
   position: sticky;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   top: 0;
-  height: 100px;
   background-color: #444;
 `
 
@@ -20,7 +24,7 @@ const TopMenu = () => {
   }
 
   const dumpOptionsInfo = () => {
-    const videoTrack = videoElem.srcObject.getVideoTracks()[0];
+    const videoTrack = videoElem.current.srcObject.getVideoTracks()[0];
     console.log(videoTrack)
 
     console.info("Track settings:");
@@ -29,16 +33,28 @@ const TopMenu = () => {
     console.info(JSON.stringify(videoTrack.getConstraints(), null, 2));
   }
 
+  // const startCapture = async () => {
+  //   try {
+  //     const mediaDevices = navigator.mediaDevices
+  //     videoElem.current.srcObject = await mediaDevices.getDisplayMedia(
+  //       displayMediaOptions
+  //     )
+  //     dumpOptionsInfo()
+  //   } catch (err) {
+  //     console.error('Error: ' + err)
+  //   }
+  // }
+
   const startCapture = async () => {
-    try {
-      const mediaDevices = navigator.mediaDevices
-      videoElem.current.srcObject = await mediaDevices.getDisplayMedia(
-        displayMediaOptions
-      )
-      dumpOptionsInfo()
-    } catch (err) {
-      console.error('Error: ' + err)
-    }
+    const processImageData = imageData => {
+      console.log(imageData)
+    };
+    const stream = new StreamDisplay(processImageData);
+
+    await stream.startCapture();
+    setTimeout(() => {
+      stream.stopCapture();
+    }, 5000)
   }
 
   const stopCapture = evt => {
@@ -52,11 +68,17 @@ const TopMenu = () => {
   }
 
   return (
-    <Container>
-      <p onClick={() => startCapture()}>Start</p>
-      <p onClick={() => stopCapture()}>Stop</p>
-      <video ref={videoElem} autoPlay></video>
-    </Container>
+    <>
+      <Container>
+        <div>
+          <Button primary onClick={() => startCapture()}>Start</Button>
+        </div>
+        <div>
+          <Button color='youtube' onClick={() => stopCapture()}>Stop</Button>
+        </div>
+      </Container>
+      <video ref={videoElem} style={{ display: 'none' }} autoPlay></video>
+    </>
   )
 }
 
