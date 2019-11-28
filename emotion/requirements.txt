@@ -1,0 +1,10 @@
+flask
+flask_restful
+flask_cors
+tensorflow
+pandas
+numpy
+cv2
+scipy
+imutils
+dlib
