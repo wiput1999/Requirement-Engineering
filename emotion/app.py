@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, session, request, redirect, flash, Response
-from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
@@ -8,6 +7,8 @@ import emotion
 ALLOWED_EXTENSIONS = {'webm'}
 
 app = Flask(__name__)
+CORS(app)
+
 app.config['UPLOAD_FOLDER'] = '/upload'
 
 @app.route('/emotion', method=['POST'])
@@ -25,3 +26,4 @@ def emotion():
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
