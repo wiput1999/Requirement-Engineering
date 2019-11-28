@@ -12,7 +12,7 @@ CORS(app)
 app.config['UPLOAD_FOLDER'] = 'upload'
 
 @app.route('/emotion', methods=['POST'])
-def emotion():
+def emotions():
     file = request.files['video']
     if file.filename == '':
         return jsonify({"success": False}), 400
@@ -21,8 +21,7 @@ def emotion():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
 
-    results = emotion.gen(filepath)
-    return jsonify(results)
+    return jsonify(emotion.gen(filepath))
 
 def allowed_file(filename):
     return '.' in filename and \
