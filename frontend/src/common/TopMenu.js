@@ -8,7 +8,7 @@ const Container = styled.div`
   width: 100%;
   position: sticky;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   top: 0;
   z-index: 9999;
   background-color: #444;
@@ -77,16 +77,18 @@ const ResultBox = styled.div(props => {
   }
 })
 
+let recordVideo = null
+let screenRecording = null
+
 const TopMenu = () => {
   const videoElem = useRef()
   const screenElem = useRef()
   const resultElem = useRef()
+  const webcamElem = useRef()
 
   const [result, setResult] = useState([])
   const [showResult, setShowResult] = useState(false)
 
-  let recordVideo = null
-  let screenRecording = null
 
   const captureUserMedia = (callback) => {
     var params = { audio: false, video: true };
@@ -125,10 +127,11 @@ const TopMenu = () => {
   }
 
   const stopCapture = () => {
+    setShowResult(true)
     recordVideo.stopRecording(async () => {
-      const formData = new FormData();
+      const formData = new FormData()
       const blob = await recordVideo.getBlob()
-      formData.append('video', blob, 'video.webm')
+      formData.append('video', blob, `${Math.floor(Math.random() * 10000000)}.webm`)
       const config = {
         headers: {
           'content-type': 'multipart/form-data'
@@ -138,13 +141,14 @@ const TopMenu = () => {
       const result = await axios.post('/emotion', formData, config)
 
       setResult(result.data)
-      setShowResult(true)
 
       resultElem.current.src = URL.createObjectURL(blob)
-    })
 
-    screenRecording.stopRecording(() => {
+      screenRecording.stopRecording(async () => {
+        const blob = await screenRecording.getBlob()
 
+        webcamElem.current.src = URL.createObjectURL(blob)
+      })
     })
 
     let webcamTracks = videoElem.current.srcObject.getTracks();
@@ -165,6 +169,7 @@ const TopMenu = () => {
         <ResultContainer>
           <center>
             <video ref={resultElem} controls></video>
+            <video style={{ maxWidth: '50%', height: 'auto' }} ref={webcamElem} controls></video>
           </center>
           <ResultBar size={result.length}>
             {result.map((e, i) => <ResultBox key={i} emotion={e}></ResultBox>)}
@@ -174,7 +179,10 @@ const TopMenu = () => {
       <Container>
         <div>
           <Button primary onClick={() => startCapture()}>Start</Button>
-          <Button color='youtube' onClick={() => stopCapture()}>Stop</Button>
+          <Button color='green' onClick={() => stopCapture()}>Finish</Button>
+        </div>
+        <div style={{ color: '#fff' }}>
+          Task 1 : Go to login portal
         </div>
         <div>
           <video ref={videoElem} style={{ maxHeight: '50px' }} autoPlay></video>
